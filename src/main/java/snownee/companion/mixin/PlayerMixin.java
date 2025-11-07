@@ -20,12 +20,36 @@ import snownee.companion.Hooks;
 @Mixin(value = Player.class, priority = 1050)
 public abstract class PlayerMixin implements CompanionPlayer {
 
+	@Unique
+	private double companion$xOld;
+	@Unique
+	private double companion$zOld;
+
+	@Unique
+	public void companion$setOldPosition(double x, double z) {
+		this.companion$xOld = x;
+		this.companion$zOld = z;
+	}
+
+	@Override
+	public double companion$getOwnerAwaySpeed(double petX, double petZ) {
+		Player player = (Player) (Object) this;
+		double currentX = player.getX();
+		double currentZ = player.getZ();
+
+		double currentDist = Math.sqrt((currentX - petX) * (currentX - petX) + (currentZ - petZ) * (currentZ - petZ));
+		double oldDist = Math.sqrt((companion$xOld - petX) * (companion$xOld - petX) + (companion$zOld - petZ) * (companion$zOld - petZ));
+
+		return currentDist - oldDist;
+	}
+
 	@Inject(at = @At("TAIL"), method = "aiStep")
 	private void companion_aiStep(CallbackInfo ci) {
 		Player player = (Player) (Object) this;
 		if (player.level().isClientSide) {
 			return;
 		}
+		companion$setOldPosition(player.getX(), player.getZ());
 		if (player.isSleeping() || player.isInPowderSnow) {
 			removeEntitiesOnShoulder();
 			return;

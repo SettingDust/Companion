@@ -10,4 +10,5 @@ public interface CompanionPlayer {
 
 	void companion$removeShoulderEntities();
 
+	double companion$getOwnerAwaySpeed(double petX, double petZ);
 }
